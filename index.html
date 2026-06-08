@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zummi Shop — Catálogo</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=DM+Sans:wght@300;400;500&display=swap');
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --cream: #FAF8F4; --white: #FFFFFF; --charcoal: #2C2924;
+    --mid: #7A6F63; --soft: #C4B8AA; --accent: #C2744A;
+    --card-border: rgba(44,41,36,0.10); --radius: 14px;
+  }
+  body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--charcoal); min-height: 100vh; }
+  .site-header { background: var(--charcoal); padding: 1.8rem 1.5rem 1.5rem; text-align: center; position: relative; overflow: hidden; }
+  .site-header::before { content: ''; position: absolute; inset: 0; background: repeating-linear-gradient(-45deg, transparent, transparent 28px, rgba(255,255,255,0.025) 28px, rgba(255,255,255,0.025) 29px); }
+  .header-inner { position: relative; display: flex; flex-direction: column; align-items: center; gap: 0.6rem; }
+  .logo-img { height: 80px; width: auto; border-radius: 8px; }
+  .logo-text { font-family: 'Playfair Display', serif; font-size: clamp(1.6rem, 5vw, 2.6rem); font-weight: 600; color: #fff; letter-spacing: 0.06em; }
+  .logo-text span { color: #E8A87C; }
+  .tagline { font-size: 0.78rem; letter-spacing: 0.22em; text-transform: uppercase; color: rgba(255,255,255,0.45); }
+  .tab-nav { background: var(--white); border-bottom: 1px solid var(--card-border); display: flex; justify-content: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 1px 8px rgba(0,0,0,0.06); }
+  .tab-btn { font-family: 'DM Sans', sans-serif; font-size: 0.82rem; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: var(--mid); background: none; border: none; border-bottom: 2.5px solid transparent; padding: 1rem 1.6rem; cursor: pointer; transition: color 0.2s, border-color 0.2s; white-space: nowrap; }
+  .tab-btn:hover { color: var(--charcoal); }
+  .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .section { display: none; padding: 2.5rem 1.5rem 4rem; max-width: 1100px; margin: 0 auto; }
+  .section.active { display: block; }
+  .section-header { margin-bottom: 2rem; border-left: 3px solid var(--accent); padding-left: 1rem; }
+  .section-header h2 { font-family: 'Playfair Display', serif; font-size: clamp(1.4rem, 3.5vw, 1.9rem); font-weight: 400; color: var(--charcoal); }
+  .section-header p { font-size: 0.85rem; color: var(--mid); margin-top: 0.35rem; font-weight: 300; }
+  .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 1.25rem; }
+  .card { background: var(--white); border: 1px solid var(--card-border); border-radius: var(--radius); overflow: hidden; cursor: pointer; transition: transform 0.18s, box-shadow 0.18s; }
+  .card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(44,41,36,0.10); }
+  .card-img { width: 100%; aspect-ratio: 3/4; object-fit: contain; background: #F7F3EE; display: block; padding: 1rem; }
+  .card-body { padding: 0.85rem 1rem 1rem; border-top: 1px solid var(--card-border); }
+  .card-name { font-size: 0.82rem; font-weight: 500; color: var(--charcoal); line-height: 1.35; text-transform: capitalize; }
+  .card-sub { font-size: 0.72rem; color: var(--soft); margin-top: 0.2rem; font-weight: 300; }
+  .lightbox-bg { display: none; position: fixed; inset: 0; background: rgba(30,26,22,0.78); z-index: 1000; align-items: center; justify-content: center; padding: 1.5rem; }
+  .lightbox-bg.open { display: flex; }
+  .lightbox { background: var(--white); border-radius: var(--radius); max-width: 480px; width: 100%; overflow: hidden; position: relative; animation: pop 0.2s ease; }
+  @keyframes pop { from { transform: scale(0.94); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  .lb-img { width: 100%; aspect-ratio: 3/4; object-fit: contain; background: #F7F3EE; padding: 2rem; display: block; }
+  .lb-body { padding: 1.25rem 1.5rem 1.5rem; border-top: 1px solid var(--card-border); }
+  .lb-name { font-family: 'Playfair Display', serif; font-size: 1.2rem; font-weight: 400; color: var(--charcoal); text-transform: capitalize; }
+  .lb-cat { font-size: 0.75rem; color: var(--mid); text-transform: uppercase; letter-spacing: 0.12em; margin-top: 0.2rem; }
+  .lb-close { position: absolute; top: 0.75rem; right: 0.75rem; width: 32px; height: 32px; border-radius: 50%; background: rgba(44,41,36,0.12); border: none; cursor: pointer; font-size: 1rem; color: var(--charcoal); display: flex; align-items: center; justify-content: center; }
+  .lb-close:hover { background: rgba(44,41,36,0.22); }
+  footer { background: var(--charcoal); color: rgba(255,255,255,0.5); text-align: center; font-size: 0.75rem; padding: 1.5rem; letter-spacing: 0.05em; }
+  footer strong { color: #E8A87C; }
+  @media (max-width: 540px) { .tab-btn { padding: 0.9rem 0.75rem; font-size: 0.7rem; } .product-grid { grid-template-columns: repeat(2, 1fr); gap: 0.75rem; } }
+</style>
+</head>
+<body>
+<header class="site-header">
+  <div class="header-inner">
+    <img class="logo-img" src="logo.jpeg" alt="Zummi Shop Logo">
+    <div class="logo-text">Zummi<span> Shop</span></div>
+    <div class="tagline">Termos &amp; Accesorios</div>
+  </div>
+</header>
+<nav class="tab-nav">
+  <button class="tab-btn active" onclick="showTab('diseno', this)">Owala Diseño</button>
+  <button class="tab-btn" onclick="showTab('bicolor', this)">Owala Bicolor</button>
+  <button class="tab-btn" onclick="showTab('stanley', this)">Stanley Shaker</button>
+</nav>
+<main>
+  <section id="tab-diseno" class="section active">
+    <div class="section-header">
+      <h2>Owala FreeSip 32 oz — Diseño</h2>
+      <p>Estampados y patrones únicos</p>
+    </div>
+    <div class="product-grid" id="grid-diseno"></div>
+  </section>
+  <section id="tab-bicolor" class="section">
+    <div class="section-header">
+      <h2>Owala FreeSip 32 oz — Bicolor</h2>
+      <p>Colores sólidos y bicolor · Tapa FreeSip original</p>
+    </div>
+    <div class="product-grid" id="grid-bicolor"></div>
+  </section>
+  <section id="tab-stanley" class="section">
+    <div class="section-header">
+      <h2>Stanley IceFlow Shaker</h2>
+      <p>Para mezclas y batidos · Acero inoxidable</p>
+    </div>
+    <div class="product-grid" id="grid-stanley"></div>
+  </section>
+</main>
+<div class="lightbox-bg" id="lightbox" onclick="closeLB(event)">
+  <div class="lightbox">
+    <button class="lb-close" onclick="closeLB()" aria-label="Cerrar">✕</button>
+    <img class="lb-img" id="lb-img" src="" alt="">
+    <div class="lb-body">
+      <div class="lb-name" id="lb-name"></div>
+      <div class="lb-cat" id="lb-cat"></div>
+    </div>
+  </div>
+</div>
+<footer><strong>Zummi Shop</strong> &nbsp;·&nbsp; Todos los derechos reservados</footer>
+<script>
+const catalog = {
+  diseno: [
+    { name: "Animal Print Hello Kitty", img: "owala%2032o%20dis/owala%2032%20o%20animal%20print%20hello%20kitty.png" },
+    { name: "Cuadros Cafés", img: "owala%2032o%20dis/owala%2032%20o%20cuadros%20caf%C3%A9s.png" },
+    { name: "Cuadros Verdes", img: "owala%2032o%20dis/owala%2032%20o%20cuadros%20verdes.png" },
+    { name: "Cuadros Corazones Rosas", img: "owala%2032o%20dis/owala%2032%20o%20cuadros_corazones%20rosas.png" },
+    { name: "Hello Kitty Rosa", img: "owala%2032o%20dis/owala%2032%20o%20hello%20kitty%20rosa.png" },
+    { name: "Moños Fondo Rosa", img: "owala%2032o%20dis/owala%2032%20o%20mo%C3%B1os%20fondo%20rosa.png" },
+    { name: "Moños Verdes", img: "owala%2032o%20dis/owala%2032%20o%20mo%C3%B1os%20verdes.png" },
+    { name: "Rayas Azul Cerezas", img: "owala%2032o%20dis/owala%2032%20o%20rayas%20azul%20cerezas.png" },
+    { name: "Verde Con Margaritas", img: "owala%2032o%20dis/owala%2032%20o%20verde%20con%20margaritas.png" }
+  ],
+  bicolor: [
+    { name: "Azul Claro", img: "owala%20bicolor/owala%2032o%20azul%20claro.png" },
+    { name: "Azul Degradado", img: "owala%20bicolor/owala%2032o%20azul%20degradado.png" },
+    { name: "Azul Marino", img: "owala%20bicolor/owala%2032o%20azul%20marino.png" },
+    { name: "Blanco Negro", img: "owala%20bicolor/owala%2032o%20blanco%20negro.png" },
+    { name: "Cappuchino", img: "owala%20bicolor/owala%2032o%20cappuchino.png" },
+    { name: "Crema", img: "owala%20bicolor/owala%2032o%20crema.png" },
+    { name: "Lila", img: "owala%20bicolor/owala%2032o%20lila.png" },
+    { name: "Morado", img: "owala%20bicolor/owala%2032o%20morado.png" },
+    { name: "Negro", img: "owala%20bicolor/owala%2032o%20negro.png" },
+    { name: "Rosa Crema", img: "owala%20bicolor/owala%2032o%20rosa%20crema.png" },
+    { name: "Rosa Mostaza", img: "owala%20bicolor/owala%2032o%20rosa%20mostaza.png" },
+    { name: "Verde Aceituna", img: "owala%20bicolor/owala%2032o%20verde%20aceituna.png" },
+    { name: "Verde Agua", img: "owala%20bicolor/owala%2032o%20verde%20agua.png" }
+  ],
+  stanley: [
+    { name: "Azul", img: "shakers%20stanley%20editados/stanley%20azul.png" },
+    { name: "Blanco", img: "shakers%20stanley%20editados/stanley%20blanco.png" },
+    { name: "Lila", img: "shakers%20stanley%20editados/stanley%20lila.png" },
+    { name: "Naranja", img: "shakers%20stanley%20editados/stanley%20naranja.png" },
+    { name: "Rosa Obscuro", img: "shakers%20stanley%20editados/stanley%20rosa%20obscuro.png" },
+    { name: "Verde Aceituna", img: "shakers%20stanley%20editados/stanley%20verde%20aceituna.png" },
+    { name: "Verde Agua", img: "shakers%20stanley%20editados/stanley%20verde%20agua.png" }
+  ]
+};
+const catLabels = { diseno: 'Owala FreeSip · Diseño', bicolor: 'Owala FreeSip · Bicolor', stanley: 'Stanley Shaker' };
+function renderGrid(key) {
+  const grid = document.getElementById('grid-' + key);
+  if (grid.children.length) return;
+  catalog[key].forEach(item => {
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `<img class="card-img" src="${item.img}" alt="${item.name}" loading="lazy"><div class="card-body"><div class="card-name">${item.name}</div><div class="card-sub">${catLabels[key]}</div></div>`;
+    card.onclick = () => openLB(item.img, item.name, catLabels[key]);
+    grid.appendChild(card);
+  });
+}
+function showTab(key, btn) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + key).classList.add('active');
+  btn.classList.add('active');
+  renderGrid(key);
+}
+function openLB(img, name, cat) {
+  document.getElementById('lb-img').src = img;
+  document.getElementById('lb-name').textContent = name;
+  document.getElementById('lb-cat').textContent = cat;
+  document.getElementById('lightbox').classList.add('open');
+}
+function closeLB(e) {
+  if (!e || e.target.id === 'lightbox' || e.target.classList.contains('lb-close')) {
+    document.getElementById('lightbox').classList.remove('open');
+  }
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLB(); });
+renderGrid('diseno');
+</script>
+</body>
+</html>
